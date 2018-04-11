@@ -3,8 +3,8 @@ pragma solidity ^0.4.17;
 contract SmartFund {
     address public owner;
     address public benefactor;
-    bool public refunded;
-    bool public complete;
+    bool public isRefunded;
+    bool public isCmpleted;
     uint public numPledges;
     struct Pledge {
         uint amount;
@@ -17,37 +17,38 @@ contract SmartFund {
     function smartFund(address _benefactor) public {
         owner = msg.sender;
         numPledges = 0;
-        refunded = false;
-        complete = false;
+        isRefunded = false;
+        isCmpleted = false;
         benefactor = _benefactor;
     }
 
     // add a new pledge
-    function pledge(bytes32 _message) public payable returns (bool success) {
-        if (msg.value == 0 || complete || refunded) revert();
+    function back(bytes32 _message) public payable {
+        if (msg.value == 0 || isCmpleted || isRefunded) revert();
         pledges[numPledges] = Pledge(msg.value, msg.sender, _message);
         numPledges++;
-        return true;
     }
 
     function getPot() public constant returns (uint) {
-        return address(this).balance;
+        address contractAddress = this;
+        return contractAddress.balance;
     }
 
     // refund the backers
     function refund() public {
-        if (msg.sender != owner || complete || refunded) revert();
+        if (msg.sender != owner || isCmpleted || isRefunded) revert();
         for (uint i = 0; i < numPledges; ++i) {
             pledges[i].eth_address.transfer(pledges[i].amount);
         }
-        refunded = true;
-        complete = true;
+        isRefunded = true;
+        isCmpleted = true;
     }
 
     // send funds to the contract benefactor
     function drawdown() public {
-        if (msg.sender != owner || complete || refunded) revert();
-        benefactor.transfer(address(this).balance);
-        complete = true;
+        if (msg.sender != owner || isCmpleted || isRefunded) revert();
+        address contractAddress = this;
+        benefactor.transfer(contractAddress.balance);
+        isCmpleted = true;
     }
 }
