@@ -1,5 +1,5 @@
-var SmartFund = artifacts.require("SmartFund");
+var EtherFund = artifacts.require("EtherFund");
 
 module.exports = function(deployer) {
-  deployer.deploy(SmartFund);
+  deployer.deploy(EtherFund);
 };

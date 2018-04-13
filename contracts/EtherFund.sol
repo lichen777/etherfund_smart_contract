@@ -98,56 +98,56 @@ contract EtherFund {
             payOut();
 
             // could incentivize sender who initiated state change here
-            } else if ( now > raiseBy )  {
-                state = State.ExpiredRefund; // backers can now collect refunds by calling getRefund(id)
-            }
-            completeAt = now;
+        } else if ( now > raiseBy ) {
+            state = State.ExpiredRefund; // backers can now collect refunds by calling getRefund(id)
         }
-
-        function payOut()
-        public
-        inState(State.Successful)
-        {
-            if(!beneficiary.send(address(this).balance)) {
-                revert();
-            }
-            state = State.Closed;
-            currentBalance = 0;
-            emit LogWinnerPaid(beneficiary);
-        }
-
-        function getRefund(uint256 id)
-        public
-        inState(State.ExpiredRefund)
-        returns (bool)
-        {
-            if (contributions.length <= id || id < 0 || contributions[id].amount == 0 ) {
-                revert();
-            }
-
-            uint amountToRefund = contributions[id].amount;
-            contributions[id].amount = 0;
-
-            if(!contributions[id].contributor.send(amountToRefund)) {
-                contributions[id].amount = amountToRefund;
-                return false;
-            }
-            else{
-                totalRaised -= amountToRefund;
-                currentBalance = totalRaised;
-            }
-
-            return true;
-        }
-
-        function removeContract()
-        public
-        isCreator()
-        atEndOfLifecycle()
-        {
-            selfdestruct(msg.sender);
-            // creator gets all money that hasn't be claimed
-        }
-
-        function () public { revert(); }
+        completeAt = now;
     }
+
+    function payOut()
+    public
+    inState(State.Successful)
+    {
+        if(!beneficiary.send(address(this).balance)) {
+            revert();
+        }
+        state = State.Closed;
+        currentBalance = 0;
+        emit LogWinnerPaid(beneficiary);
+    }
+
+    function getRefund(uint256 id)
+    public
+    inState(State.ExpiredRefund)
+    returns (bool)
+    {
+        if (contributions.length <= id || id < 0 || contributions[id].amount == 0 ) {
+            revert();
+        }
+
+        uint amountToRefund = contributions[id].amount;
+        contributions[id].amount = 0;
+
+        if(!contributions[id].contributor.send(amountToRefund)) {
+            contributions[id].amount = amountToRefund;
+            return false;
+        }
+        else{
+            totalRaised -= amountToRefund;
+            currentBalance = totalRaised;
+        }
+
+        return true;
+    }
+
+    function removeContract()
+    public
+    isCreator()
+    atEndOfLifecycle()
+    {
+        selfdestruct(msg.sender);
+        // creator gets all money that hasn't be claimed
+    }
+
+    function () public { revert(); }
+}
