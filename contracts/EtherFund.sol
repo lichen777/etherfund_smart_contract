@@ -5,7 +5,7 @@ contract EtherFund {
     address public creator;
     address public beneficiary; // creator may be different than recipient
     uint public target; // required to reach at least this much, else everyone gets refund
-    string campaignId;
+    string public campaignId;
 
     // Data structures
     enum State {
@@ -26,14 +26,14 @@ contract EtherFund {
     uint public currentBalance;
     uint public raiseBy;
     uint public completeAt;
-    Contribution[] contributions;
+    Contribution[] public contributions;
 
     event LogFundingReceived(address addr, uint amount, uint currentTotal);
     event LogWinnerPaid(address winnerAddress);
     event LogFunderInitialized(
         address creator,
         address beneficiary,
-        string url,
+        string _campaignId,
         uint _target,
         uint256 raiseby
     );
