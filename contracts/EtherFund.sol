@@ -91,6 +91,10 @@ contract EtherFund {
         checkIfFundingCompleteOrExpired();
         return contributions.length - 1; // return id
     }
+    
+    function getBackerCount() public constant returns(uint count) {
+        return contributions.length;
+    }
 
     function checkIfFundingCompleteOrExpired() public {
         if (totalRaised > target) {

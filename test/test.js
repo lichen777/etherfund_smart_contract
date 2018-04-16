@@ -1,33 +1,29 @@
 const EtherFund = artifacts.require('../contracts/EtherFund.sol')
+const Web3 = require("web3");
+const web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
 
-contract("EtherFund", function(accounts) {
-  const recipientAccount = accounts[9]
-  const init = { poolTime: 100, currentTime: 0, recipient: recipientAccount }
 
-  describe('isClosed()', () => {
-    it('should return false when currentTime is less than startTime + poolTime', async () => {
-      return await isClosedTest({
-        init,
-        finalTime: 50,
-        expectedReturnVal: false
-      })
-    })
+contract("EtherFund", async (accounts) => {
 
-    it('should return true when currentTime is greater than startTime + poolTime', async () => {
-      return await isClosedTest({
-        init,
-        finalTime: 150,
-        expectedReturnVal: true
-      })
-    })
+  it("should show the correct target", async () => {
+    let instance = await EtherFund.deployed();
+    let target = await instance.target.call();
+    assert.equal(target.valueOf().toString(), web3.utils.toWei('10', "ether"));
+  });
 
-    it('should return true when currentTime is equal to startTime + poolTime', async () => {
-      return await isClosedTest({
-        init,
-        finalTime: 100,
-        expectedReturnVal: true
-      })
-    })
+  it("should contribute correctly", async () => {
+    let instance = await EtherFund.deployed();
+    //console.log(instance.contribute)
+    instance.contribute({
+      gas: 3000000,
+      from: "0x508f9b2b87f45a44ec0096c78d490bd4deb7e774",
+      value: web3.utils.toWei("0.1", "ether")
+    });
+
+    let totalRaised = await instance.totalRaised.call();
+    assert.equal(totalRaised.valueOf().toString(), web3.utils.toWei("0.1", "ether"));
+  });
+
 });
 
 
@@ -36,11 +32,11 @@ async function logMyContract(EtherFund) {
   console.log("MyContract:");
   console.log("--------------");
   console.log(`BALANCE: ${getBalanceInEth(EtherFund.address)}`);
-  console.log(`startTime=${await EtherFund.startTime.call()}`);
-  console.log(`poolTime=${await EtherFund.poolTime.call()}`);
-  console.log(`threshold=${await EtherFund.threshold.call()}`);
-  console.log(`recipient=${await EtherFund.recipient.call()}`);
-  console.log(`currentTime()=${await EtherFund.currentTime.call()}`);
-  console.log(`isClosed()=${await EtherFund.isClosed.call()}`);
+  console.log(`creator=${await EtherFund.creator.call()}`);
+  console.log(`beneficiary=${await EtherFund.beneficiary.call()}`);
+  console.log(`target=${await EtherFund.target.call()}`);
+  console.log(`currentBalance=${await EtherFund.currentBalance.call()}`);
+  console.log(`isCreator()=${await EtherFund.isCreator.call()}`);
+  console.log(`atEndOfLifecycle()=${await EtherFund.isCreator.call()}`);
   console.log("");
 }
